@@ -55,7 +55,7 @@ Run when invoked with a goal and there is no existing mission directory passed b
    - If `package.json` exists without a frontend framework → `type: api`, `behavior_tool: bash`.
    - If `Cargo.toml`, `go.mod`, or `pyproject.toml` with a CLI entrypoint → `type: cli`, `behavior_tool: bash`.
    - If `pyproject.toml` or `setup.py` describes a library with no entry point → `type: library`, `behavior_tool: none`.
-   - On ambiguity, ASK the user which type fits. (Phase 0 is the one place where asking is allowed.)
+   - On ambiguity, ASK the user which type fits.
 6. **Write `state.project` and `state.updated_at`.** Keep `status: "planning"`.
 7. **Announce to the user:** mission directory created, project type detected, moving to planning.
 
@@ -63,7 +63,7 @@ Run when invoked with a goal and there is no existing mission directory passed b
 
 Goal: produce a validation contract, then a feature/milestone plan, then get user approval, then flip to executing.
 
-1. **Clarifying conversation.** Ask one question at a time. Focus on scope boundaries, must-haves, explicit non-goals, and constraints (existing data, deployment targets, performance bars). Do not start drafting yet.
+1. **Clarifying conversation.** Planning is a conversation, not a one-shot prompt. Ask clarifying questions, probe for constraints, and push back on vague or under-specified parts of the goal until the requirements are unambiguous. Continue iterating throughout Phase 1 — including after drafts of the contract and plan exist — whenever something is unclear; do not silently assume. Focus on scope boundaries, must-haves, explicit non-goals, and constraints (existing data, deployment targets, performance bars, tooling preferences). Prefer one question at a time so the user can answer directly; batch 2–4 tightly related questions only when it speeds the conversation. Do not start drafting until the goal is clear enough to define a finite set of testable assertions.
 
 2. **Draft the validation contract first.** This is the load-bearing artifact — done is whatever the contract says.
    - Copy `templates/validation-contract.md` to `<mission-dir>/validation-contract.md`.
@@ -80,7 +80,7 @@ Goal: produce a validation contract, then a feature/milestone plan, then get use
 
 5. **Write `state.milestones` and `state.features`.** Use Edit or a small Python one-liner to update `state.json`.
 
-6. **Present plan + contract to user.** Get explicit approval ("approved" or equivalent). Edits go back to step 2/3 as needed. Do not advance past Phase 1 without approval.
+6. **Approval gate — present plan + contract to user.** Show the validation contract and `plan.md` (milestones → features → assertion coverage) together and require explicit approval ("approved" or equivalent) before any worker is dispatched. If the user asks for changes, return to step 2 or 3, revise, and re-present. Do not advance past Phase 1 without approval — this is the load-bearing user touchpoint, and a well-scoped plan dramatically improves execution quality.
 
 7. **Flip `state.status` to `executing`** and `state.cursor` to `{ current_feature: <first pending feat>, phase: "implementing" }`. Write `state.updated_at`. Announce: planning approved, executing.
 
@@ -257,8 +257,8 @@ If the user invokes the skill with a path to an existing `.missions/<mission-id>
 
 Within a single session, run Phase 2 → 3 → 4 → 2 (loop) without pausing for user input. Do not ask "should I continue?" between features or milestones. The user gave you a goal and approved the plan; execute until you reach `complete` or `blocked`. The only exceptions:
 
-- Phase 0 project-type detection ambiguity (one allowed question)
-- Phase 1 clarifying conversation and plan approval
+- Phase 0 project-type detection ambiguity
+- Phase 1 clarifying conversation and approval gate (conversational by design — see Phase 1 step 1)
 - Phase 5 (block surfaces and waits)
 
 ## Resumability invariant
