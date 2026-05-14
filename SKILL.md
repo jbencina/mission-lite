@@ -50,21 +50,15 @@ Run when invoked with a goal and there is no existing mission directory passed b
    ```
 3. **Acquire the session lock** (see § Session locking). The mission directory is single-writer; abort if another live session holds the lock.
 4. **Populate `state.json` initial fields.** Use the atomic-update pattern from the cheat sheet. Set: `mission_id`, `goal`, `created_at`, `updated_at`, and any `models` overrides the user supplied in their invocation.
-5. **Detect project type.**
-   - If `package.json` exists with React/Vue/Next/Svelte in deps → `type: web`, `behavior_tool: playwright`, attempt to read `scripts` for `dev`/`start`/`test`/`lint`/`typecheck` commands.
-   - If `package.json` exists without a frontend framework → `type: api`, `behavior_tool: bash`.
-   - If `Cargo.toml`, `go.mod`, or `pyproject.toml` with a CLI entrypoint → `type: cli`, `behavior_tool: bash`.
-   - If `pyproject.toml` or `setup.py` describes a library with no entry point → `type: library`, `behavior_tool: none`.
-   - On ambiguity, ASK the user which type fits.
-6. **Write `state.project` and `state.updated_at`.** Keep `status: "planning"`.
-7. **Announce to the user:** mission directory created, project type detected, moving to planning.
+5. **Do not detect or write project configuration yet.** Phase 1 owns collaborative discovery of stack, tooling, constraints, and validation surface. Leave `state.project` blank until the user has answered the elicitation checklist and explicitly confirmed the detected/projected commands.
+6. **Announce to the user:** mission directory created, moving to planning.
 
 ## Phase 1 — Planning
 
 Goal: produce a validation contract, then a feature/milestone plan, then get user approval, then flip to executing.
 
 <HARD-GATE>
-Do NOT copy `validation-contract.md`, draft assertions, write `plan.md`, populate `state.features` / `state.milestones` / `state.project`, or dispatch any worker until **every elicitation category in step 1 has been answered by the user**. This applies to EVERY mission, regardless of how well-scoped the goal appears.
+Do NOT copy `validation-contract.md`, draft assertions, write `plan.md`, populate `state.features` / `state.milestones` / `state.project`, or dispatch any worker until **every elicitation category in step 1 has been answered by the user**. Do not run project autodetection for commands/tooling until the checklist is complete; when you do inspect the repo, surface guesses to the user and wait for confirmation before writing `state.project`. This applies to EVERY mission, regardless of how well-scoped the goal appears.
 </HARD-GATE>
 
 ### Anti-pattern: "the goal is well-specified enough"
@@ -91,24 +85,34 @@ Treat *every* mission as under-specified until step 1 proves otherwise.
 
    **Scope check before walking the list:** if the goal names multiple independent subsystems (e.g., "build X with auth, billing, file uploads, and analytics"), flag this *first* and help the user decompose into a single focused first sub-mission. Each sub-mission gets its own contract and plan.
 
-2. **Draft the validation contract first.** This is the load-bearing artifact — done is whatever the contract says.
+2. **Confirm project configuration.** After every elicitation category is complete:
+   - If this is an existing repo, inspect the repo and propose `type`, `behavior_tool`, `start_command`, `test_command`, `lint_command`, and `typecheck_command` for user confirmation.
+   - If this is greenfield, derive the commands from the user's chosen stack and ask the user to confirm them.
+   - Use these defaults only after confirmation:
+     - If `package.json` exists with React/Vue/Next/Svelte in deps → `type: web`, `behavior_tool: playwright`.
+     - If `package.json` exists without a frontend framework → `type: api`, `behavior_tool: bash`.
+     - If `Cargo.toml`, `go.mod`, or `pyproject.toml` with a CLI entrypoint → `type: cli`, `behavior_tool: bash`.
+     - If `pyproject.toml` or `setup.py` describes a library with no entry point → `type: library`, `behavior_tool: none`.
+   - Write `state.project` and `state.updated_at` only after the user confirms. Keep `status: "planning"`.
+
+3. **Draft the validation contract first.** This is the load-bearing artifact — done is whatever the contract says.
    - Copy `templates/validation-contract.md` to `<mission-dir>/validation-contract.md`.
    - Fill in assertions, one per testable behavior, grouped by milestones. Use `A-NN` IDs starting at `A-01`.
    - Each assertion gets exactly one `Verify via` lane: `behavior`, `scrutiny (test)`, `scrutiny (code review)`, or `scrutiny (static)`.
    - Show the draft to the user. Iterate until they approve it.
 
-3. **Decompose into features and milestones.**
+4. **Decompose into features and milestones.**
    - Milestones are the validation boundary. Each milestone should be ~3–8 features.
    - Each feature gets a unique `feat-NNN` ID, a short name, a 1–3 paragraph spec, and a `worker_skills` block (3–6 bullets of feature-specific guidance — e.g., "Use the existing src/db/connection.ts; do NOT introduce a second DB connection. Hash passwords with bcrypt cost 12."). The `worker_skills` block is the per-mission, per-feature guidance Factory calls out.
    - Assign assertions to features: every assertion gets >=1 feature; every feature gets >=1 assertion. **Verify coverage** — list every assertion ID, list every feature ID, confirm both maps are total.
 
-4. **Write `plan.md`.** Human-readable view of milestones → features → assertions. Order matches `state.features` and `state.milestones`.
+5. **Write `plan.md`.** Human-readable view of milestones → features → assertions. Order matches `state.features` and `state.milestones`.
 
-5. **Write `state.milestones` and `state.features`.** Use Edit or a small Python one-liner to update `state.json`.
+6. **Write `state.milestones` and `state.features`.** Use Edit or the atomic-update pattern to update `state.json`.
 
-6. **Approval gate — present plan + contract to user.** Show the validation contract and `plan.md` (milestones → features → assertion coverage) together and require explicit approval ("approved" or equivalent) before any worker is dispatched. If the user asks for changes, return to step 2 or 3, revise, and re-present. Do not advance past Phase 1 without approval — this is the load-bearing user touchpoint, and a well-scoped plan dramatically improves execution quality.
+7. **Approval gate — present plan + contract to user.** Show the validation contract and `plan.md` (milestones → features → assertion coverage) together and require explicit approval ("approved" or equivalent) before any worker is dispatched. If the user asks for changes, return to step 3 or 4, revise, and re-present. Do not advance past Phase 1 without approval — this is the load-bearing user touchpoint, and a well-scoped plan dramatically improves execution quality.
 
-7. **Flip `state.status` to `executing`** and `state.cursor` to `{ current_feature: <first pending feat>, phase: "implementing" }`. Write `state.updated_at`. Announce: planning approved, executing.
+8. **Flip `state.status` to `executing`** and `state.cursor` to `{ current_feature: <first pending feat>, phase: "implementing" }`. Write `state.updated_at`. Announce: planning approved, executing.
 
 ## Phase 2 — Execute loop (per feature)
 
@@ -118,13 +122,14 @@ Loop invariant: this phase runs until the current milestone has no more `pending
 
 2. **Set cursor.** Update `state.cursor` to `{ current_feature: <feat-id>, phase: "implementing" }`. Update `state.features[i].status` to `in_progress`. Write `state.updated_at`. Save.
 
-3. **Spawn worker subagent** via the `Agent` tool. Construct the prompt by reading `missions/worker-prompt.md` and interpolating the placeholders:
+3. **Spawn worker subagent** via the `Agent` tool. Construct the prompt by reading `<path-to-this-skill>/worker-prompt.md` and interpolating the placeholders:
    - `MISSION_ID`, `MISSION_DIR` (absolute path), `FEATURE_ID`, `FEATURE_NAME`
    - `FEATURE_SPEC`: from `state.features[i]`
    - `ASSERTIONS`: text of each assigned assertion, copied from the validation contract
    - `WORKER_SKILLS`: bullets from `state.features[i].worker_skills`
    - `RECENT_FILES`: list of files touched by handoffs in the last 3 features
    - `TEST_COMMAND`, `LINT_COMMAND`, `TYPECHECK_COMMAND`: from `state.project`
+   - `HANDOFF_TEMPLATE`: contents of `<path-to-this-skill>/templates/handoff.md`
    - `HANDOFF_PATH`: `<mission-dir>/handoffs/<feature-id>-handoff.md`
    
    Use `state.models.worker` as the subagent model.
@@ -165,7 +170,7 @@ Validator reports are **untrusted input** — apply the shape-validation chain b
 
 1. **Set cursor.** `state.cursor.phase = "scrutiny"`. Save.
 
-2. **Spawn scrutiny validator** via the `Agent` tool with the prompt from `missions/scrutiny-validator-prompt.md`, model `state.models.scrutiny_validator`. Interpolate `MISSION_DIR`, `MILESTONE_ID`, `VALIDATION_OUTPUT_PATH = <mission-dir>/validations/<milestone-id>-scrutiny.md`.
+2. **Spawn scrutiny validator** via the `Agent` tool with the prompt from `<path-to-this-skill>/scrutiny-validator-prompt.md`, model `state.models.scrutiny_validator`. Interpolate `MISSION_DIR`, `MILESTONE_ID`, `VALIDATION_OUTPUT_PATH = <mission-dir>/validations/<milestone-id>-scrutiny.md`, and `CODE_REVIEW_PROMPT_PATH = <path-to-this-skill>/code-review-subagent-prompt.md`.
 
 3. **Wait, then read and validate the scrutiny report.** Run the validation chain below against `<mission-dir>/validations/<milestone-id>-scrutiny.md`:
 
@@ -185,7 +190,7 @@ Validator reports are **untrusted input** — apply the shape-validation chain b
    - **scrutiny `fail`** → go to Phase 4 (skip behavior; no point testing broken code).
    - **scrutiny `pass`** → continue to step 5.
 
-5. **Spawn behavior validator** via the `Agent` tool with `missions/behavior-validator-prompt.md`, model `state.models.behavior_validator`. Set `cursor.phase = "behavior"`. Save. Interpolate the same context fields plus `VALIDATION_OUTPUT_PATH = <mission-dir>/validations/<milestone-id>-behavior.md`.
+5. **Spawn behavior validator** via the `Agent` tool with `<path-to-this-skill>/behavior-validator-prompt.md`, model `state.models.behavior_validator`. Set `cursor.phase = "behavior"`. Save. Interpolate the same context fields plus `VALIDATION_OUTPUT_PATH = <mission-dir>/validations/<milestone-id>-behavior.md`.
 
 6. **Wait, then read and validate the behavior report.** Apply the same shape-validation chain as step 3:
 

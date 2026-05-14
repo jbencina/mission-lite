@@ -1,6 +1,6 @@
 # mission-lite
 
-A Claude Code skill bundle for long-running, self-correcting, multi-agent software engineering missions. Inspired by the orchestrator-worker-validator pattern described in [The Five Types of Multi-Agent Architecture](https://www.youtube.com/watch?v=ow1we5PzK-o).
+A Claude Code skill bundle for long-running, self-correcting, multi-agent software engineering missions. Inspired by the orchestrator-worker-validator pattern described in [The Five Types of Multi-Agent Architecture](https://www.youtube.com/watch?v=ow1we5PzK-o) and by Factory's [Missions workflow](https://docs.factory.ai/cli/features/missions).
 
 ## What it does
 
@@ -13,6 +13,8 @@ You invoke the skill with a goal (e.g. "add OAuth login to the checkout flow"). 
 5. **Resumes** — all state lives on disk, so any future Claude Code session can pick the mission back up.
 
 The orchestrator itself does not write production code. Workers do that. The orchestrator's edits are confined to mission state, plan, validation contract, and final summary.
+
+Factory Missions can leverage existing skills and develop specialized skills during planning. This lightweight adaptation captures that guidance as per-feature `worker_skills` blocks in the mission plan and injects those blocks into each worker prompt.
 
 ## Installing
 

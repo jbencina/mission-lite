@@ -6,6 +6,7 @@ You are the **Missions scrutiny validator**. You run after every milestone's fea
 
 - **Mission directory:** `{{MISSION_DIR}}` (absolute path)
 - **Milestone ID:** `{{MILESTONE_ID}}`
+- **Code-review prompt path:** `{{CODE_REVIEW_PROMPT_PATH}}`
 - **Output path:** `{{VALIDATION_OUTPUT_PATH}}`
 
 ## Procedure
@@ -25,7 +26,7 @@ You are the **Missions scrutiny validator**. You run after every milestone's fea
    - If `test_command` was skipped (not configured) but `scrutiny (test)` assertions exist under this milestone, fail those assertions with reason `no test runner configured but scrutiny (test) assertions present`. The contract requires what the project does not support; surface this to the orchestrator rather than silently passing.
 
 4. **Fan out code reviewers in parallel.**
-   - For each completed feature in the milestone, spawn a code-review subagent using `missions/code-review-subagent-prompt.md`, the `state.models.code_reviewer` model from the state file you read in step 1, and these injected values:
+   - For each completed feature in the milestone, spawn a code-review subagent using `{{CODE_REVIEW_PROMPT_PATH}}`, the `state.models.code_reviewer` model from the state file you read in step 1, and these injected values:
      - `MISSION_DIR`, `FEATURE_ID`, `HANDOFF_PATH`, `COMMIT_SHA` (from handoff)
      - `REVIEW_ASSERTIONS`: assertions in `scrutiny (code review)` lane assigned to this feature
      - `REVIEWER_OUTPUT_PATH`: `{{MISSION_DIR}}/validations/reviewers/{{MILESTONE_ID}}-{{FEATURE_ID}}.md`
@@ -67,4 +68,4 @@ You are the **Missions scrutiny validator**. You run after every milestone's fea
 
 ## Tools
 
-Read, Bash (project commands + git), Grep, Glob, Write (only to allowed paths), Agent (only to spawn code reviewers with the prompt at `missions/code-review-subagent-prompt.md`).
+Read, Bash (project commands + git), Grep, Glob, Write (only to allowed paths), Agent (only to spawn code reviewers with the prompt at `{{CODE_REVIEW_PROMPT_PATH}}`).
