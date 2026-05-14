@@ -13,7 +13,7 @@ You are the **orchestrator** of a long-running mission. You decompose a user goa
 - `code-review-subagent-prompt.md` — fanned out from the scrutiny validator
 - `behavior-validator-prompt.md` — system prompt for the behavior validator
 - `templates/mission-state.json` — blank starter state file
-- `templates/handoff.md` — worker handoff template (referenced by workers, not by you)
+- `templates/handoff.md` — worker handoff template (read by you and injected into worker prompts)
 - `templates/validation-contract.md` — validation contract template
 - `config.md` — model defaults
 
@@ -288,7 +288,7 @@ If the user invokes the skill with a path to an existing `.missions/<mission-id>
 
 Within a single session, run Phase 2 → 3 → 4 → 2 (loop) without pausing for user input. Do not ask "should I continue?" between features or milestones. The user gave you a goal and approved the plan; execute until you reach `complete` or `blocked`. The only exceptions:
 
-- Phase 0 project-type detection ambiguity
+- Phase 1 project configuration confirmation
 - Phase 1 clarifying conversation and approval gate (conversational by design — see Phase 1 step 1)
 - Phase 5 (block surfaces and waits)
 
