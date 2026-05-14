@@ -63,7 +63,33 @@ Run when invoked with a goal and there is no existing mission directory passed b
 
 Goal: produce a validation contract, then a feature/milestone plan, then get user approval, then flip to executing.
 
-1. **Clarifying conversation.** Planning is a conversation, not a one-shot prompt. Ask clarifying questions, probe for constraints, and push back on vague or under-specified parts of the goal until the requirements are unambiguous. Continue iterating throughout Phase 1 — including after drafts of the contract and plan exist — whenever something is unclear; do not silently assume. Focus on scope boundaries, must-haves, explicit non-goals, and constraints (existing data, deployment targets, performance bars, tooling preferences). Prefer one question at a time so the user can answer directly; batch 2–4 tightly related questions only when it speeds the conversation. Do not start drafting until the goal is clear enough to define a finite set of testable assertions.
+<HARD-GATE>
+Do NOT copy `validation-contract.md`, draft assertions, write `plan.md`, populate `state.features` / `state.milestones` / `state.project`, or dispatch any worker until **every elicitation category in step 1 has been answered by the user**. This applies to EVERY mission, regardless of how well-scoped the goal appears.
+</HARD-GATE>
+
+### Anti-pattern: "the goal is well-specified enough"
+
+The most common Phase 1 failure. A canonical-rules game ("Connect 4"), a well-known refactor ("migrate to TypeScript"), or a stack you can autodetect ("there's a `package.json`, must be Vite") will tempt you to skip straight to drafting. Skip the anti-pattern check and you will silently encode assumptions — board size, framework version, polish bar, AI vs. local-only, persistence, deployment target, test runner — that the user never agreed to. The contract answers a different question than the user asked. Workers execute against the wrong target. Validators pass it. The mistake compounds across milestones.
+
+Treat *every* mission as under-specified until step 1 proves otherwise.
+
+1. **Elicitation checklist.** Create a TaskCreate entry for each category below and complete them **in order, one question per message** (multiple-choice when natural, open-ended when not). Do not advance to the next category until the user has answered the current one. Do not draft the contract, write `state.project`, or autodetect any command until **every category** is complete.
+
+   a. **Scope boundaries** — what is explicitly in scope, and what is explicitly *out* (a non-goal)? Force at least one non-goal; "nothing is out of scope" is itself a red flag and means you haven't asked hard enough.
+
+   b. **Stack & tooling** — existing repo or greenfield? If greenfield: which framework, language version, test runner, lint/typecheck stack? *Do not autodetect silently.* If you ran `ls` or read `package.json` to guess `start_command` / `test_command` / `lint_command` / `typecheck_command`, surface those guesses to the user for confirmation before writing them to `state.project`. Same for `behavior_tool`.
+
+   c. **Polish bar** — prototype (functional, rough UI is fine) / demo-ready (clean, presentable, no AI features assumed) / production (accessible, responsive, error-handled, observability). The bar determines how many assertions the contract needs and how strict the behavior validator should be.
+
+   d. **Success criteria beyond "it works"** — specific observable behaviors and edge cases the user cares about (game: undo? draw detection? AI? mobile? animations? CRUD app: pagination? sort? bulk actions? auth? auditing?). Each item the user names becomes a candidate assertion; each item *you* propose unprompted needs explicit user buy-in before it enters the contract.
+
+   e. **Constraints** — deployment target (local dev only / staged / prod), performance bars, accessibility requirements, persistence (in-memory / localStorage / DB), third-party integrations, browser/OS support.
+
+   f. **Risk areas** — confirm presence/absence of {auth, ML/AI, payments, external APIs, data migrations, multi-user/concurrency, file uploads}. These are the categories that most often blow up a mission if assumed; explicit yes/no on each, even when "obviously no."
+
+   g. **Approach choice (non-trivial missions only)** — once a–f are answered, propose 2–3 implementation approaches with trade-offs and your recommendation; let the user pick. Skip only when there is genuinely one obvious approach (small bug fix, single-file refactor).
+
+   **Scope check before walking the list:** if the goal names multiple independent subsystems (e.g., "build X with auth, billing, file uploads, and analytics"), flag this *first* and help the user decompose into a single focused first sub-mission. Each sub-mission gets its own contract and plan.
 
 2. **Draft the validation contract first.** This is the load-bearing artifact — done is whatever the contract says.
    - Copy `templates/validation-contract.md` to `<mission-dir>/validation-contract.md`.
