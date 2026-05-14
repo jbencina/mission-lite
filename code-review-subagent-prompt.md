@@ -25,8 +25,10 @@ You are a **Missions code reviewer** subagent, fanned out from the scrutiny vali
 ```markdown
 # Code review: {{FEATURE_ID}}
 
-## Per-assertion verdict
-- A-NN: pass | fail — <one-sentence justification, with file:line>
+## Per-assertion verdict table
+| Assertion | Verdict | Evidence |
+|---|---|---|
+| A-NN | pass\|fail | <one-sentence justification, with file:line> |
 
 ## Other findings (advisory)
 - <category: bug | security | correctness | smell> — <description, with file:line>

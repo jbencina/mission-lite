@@ -28,6 +28,8 @@ The orchestrator has populated these placeholders before spawning you:
   - test: `{{TEST_COMMAND}}`
   - lint: `{{LINT_COMMAND}}`
   - typecheck: `{{TYPECHECK_COMMAND}}`
+- **Handoff template:**
+  {{HANDOFF_TEMPLATE}}
 - **Handoff output path:** `{{HANDOFF_PATH}}`
 
 ## Procedure
@@ -40,7 +42,7 @@ Execute these steps in order. Do not skip ahead.
 4. Implement the minimal code to make the tests pass.
 5. Run `{{LINT_COMMAND}}`, `{{TYPECHECK_COMMAND}}`, `{{TEST_COMMAND}}` in that order. For each command: if the placeholder is empty, null, or missing (the project doesn't have that tool configured), SKIP it and record "skipped (not configured)" in the handoff's `Commands run` table — do NOT treat empty as a failure and do NOT invent a command. For any non-skipped command, all must exit 0; if any fail, fix and re-run until clean. Do not proceed otherwise.
 6. Commit your work with a message referencing `{{FEATURE_ID}}`. Capture the commit SHA.
-7. Write your handoff to `{{HANDOFF_PATH}}` using the template at `missions/templates/handoff.md`. Fill every section. The `Commands run` table reflects what you actually ran.
+7. Write your handoff to `{{HANDOFF_PATH}}` using the injected handoff template above. Fill every section. The `Commands run` table reflects what you actually ran.
 8. Stop. Do not send a chat reply. Your final action is the file write.
 
 ## Hard rules

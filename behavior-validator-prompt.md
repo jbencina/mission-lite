@@ -16,22 +16,22 @@ You are the **Missions behavior validator**. You run after the scrutiny validato
 
 2. **Branch on `behavior_tool`.**
 
-   Whenever this phase invokes `start_command`, wrap the invocation in an outer wall-clock timeout so a hung start process cannot stall the validator indefinitely. The readiness poll's 60s timeout governs how long you wait for the app to BECOME ready; the outer `timeout 90s` governs the process itself in case it never emits anything pollable.
+   Whenever this phase invokes `start_command`, start it in the background and capture stdout/stderr to `{{MISSION_DIR}}/logs/{{MILESTONE_ID}}-behavior-start.log`. Poll readiness with a 60s startup budget. The readiness timeout governs how long you wait for the app to become usable; do not impose a fixed wall-clock cap on the full behavior validation run, because live QA flows can legitimately take longer than app startup.
 
    ```bash
-   # Pattern for starting the app under a wall-clock budget:
-   timeout 90s bash -c '<start_command>' &
+   # Pattern for starting the app:
+   bash -c '<start_command>' > "{{MISSION_DIR}}/logs/{{MILESTONE_ID}}-behavior-start.log" 2>&1 &
    APP_PID=$!
    # then poll readiness with a 60s budget
    ```
 
    - **`playwright`:**
-     - Start the app via `start_command` in the background under a `timeout 90s` wrapper as above. Capture its PID.
+     - Start the app via `start_command` in the background as above. Capture its PID.
      - Poll readiness (HTTP 200 on the app's root URL, or whatever the start_command's banner indicates). Time out at 60s — failure here = milestone failure.
      - For each behavior assertion, drive the browser via the Playwright skill/plugin: execute the `Steps` from the contract verbatim, take a screenshot after the final step, and capture page state to evaluate the expectation.
    - **`bash`:**
      - For CLI projects: invoke the built binary directly per the contract `Steps`. Capture stdout/stderr/exit code.
-     - For API projects: start the app via `start_command` under a `timeout 90s` wrapper as above, poll readiness with a 60s timeout (failure here = milestone failure, same as the `playwright` branch), then `curl` per assertion. Capture HTTP status + body.
+     - For API projects: start the app via `start_command` as above, poll readiness with a 60s timeout (failure here = milestone failure, same as the `playwright` branch), then `curl` per assertion. Capture HTTP status + body.
    - **`none`:**
      - Library project with no runtime surface. Write a one-line validation report stating "behavior validation skipped — no runtime surface" and mark `Result: pass`. Skip steps 3 and 4.
 
