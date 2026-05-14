@@ -1,0 +1,35 @@
+{
+  "mission_id": "",
+  "goal": "",
+  "status": "planning",
+  "created_at": "",
+  "updated_at": "",
+
+  "models": {
+    "orchestrator": "opus",
+    "worker": "sonnet",
+    "scrutiny_validator": "haiku",
+    "code_reviewer": "sonnet",
+    "behavior_validator": "sonnet"
+  },
+
+  "project": {
+    "type": "",
+    "behavior_tool": "",
+    "start_command": "",
+    "test_command": "",
+    "lint_command": "",
+    "typecheck_command": ""
+  },
+
+  "milestones": [],
+  "features": [],
+
+  "cursor": {
+    "current_feature": null,
+    "phase": null
+  },
+
+  "validation_log": [],
+  "blocked_reason": null
+}
