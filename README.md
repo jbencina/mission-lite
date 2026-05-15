@@ -1,6 +1,6 @@
 # mission-lite
 
-A Claude Code skill bundle for long-running, self-correcting, multi-agent software engineering missions. Inspired by the orchestrator-worker-validator pattern described in [The Five Types of Multi-Agent Architecture](https://www.youtube.com/watch?v=ow1we5PzK-o) and by Factory's [Missions workflow](https://docs.factory.ai/cli/features/missions).
+A Claude Code skill bundle for long-running, self-correcting, multi-agent software engineering missions. Vibe-coded by the orchestrator-worker-validator pattern described in [The Five Types of Multi-Agent Architecture](https://www.youtube.com/watch?v=ow1we5PzK-o) and by Factory's [Missions workflow](https://docs.factory.ai/cli/features/missions).
 
 ## What it does
 
