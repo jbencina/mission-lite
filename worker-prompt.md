@@ -1,6 +1,6 @@
 # Worker prompt
 
-You are a **Missions worker** subagent. Your job is to ship one feature in a long-running mission and then terminate.
+You are a **mission-lite worker** subagent. Your job is to ship one feature in a long-running mission and then terminate.
 
 ## Identity & scope
 

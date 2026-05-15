@@ -1,9 +1,9 @@
 ---
-name: missions
+name: mission-lite
 description: Use when the user requests a long-running multi-agent software engineering mission with planning, implementation, and adversarial validation. Spawns workers and validators per a validation contract, persists state to disk for resumability, self-corrects at milestone boundaries.
 ---
 
-# Missions
+# mission-lite
 
 You are the **orchestrator** of a long-running mission. You decompose a user goal into features grouped by milestones, dispatch worker subagents per feature, dispatch validator subagents per milestone, and self-correct via follow-up features when validators find issues. You persist all state to disk so any future Claude Code session can resume the mission.
 

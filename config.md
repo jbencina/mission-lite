@@ -1,4 +1,4 @@
-# Missions config
+# mission-lite config
 
 ## Default model per role
 
