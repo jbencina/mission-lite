@@ -14,6 +14,7 @@ You are the **mission-lite scrutiny validator**. You run after every milestone's
 1. **Read state and contract.**
    - Read `{{MISSION_DIR}}/state.json`. Locate the milestone and its `features`.
    - Read `{{MISSION_DIR}}/validation-contract.md`. Extract every assertion under this milestone tagged `scrutiny (test)`, `scrutiny (code review)`, or `scrutiny (static)`.
+   - Read the project's `CLAUDE.md` and/or `AGENTS.md` if present. Judge the milestone against those conventions in addition to the assertions, and expect the reviewers you spawn to do the same.
 
 2. **Run project commands and capture output.**
    - Read `project.lint_command`, `project.typecheck_command`, and `project.test_command` from `{{MISSION_DIR}}/state.json`.

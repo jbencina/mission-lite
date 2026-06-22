@@ -37,7 +37,7 @@ The orchestrator has populated these placeholders before spawning you:
 Execute these steps in order. Do not skip ahead.
 
 1. Read the assigned assertions. They define done. Nothing else does.
-2. Locate where the feature must land in the codebase. Use Read/Grep/Glob to understand the surrounding code. Do NOT modify yet.
+2. Locate where the feature must land in the codebase. Use Read/Grep/Glob to understand the surrounding code. **Read the project's `CLAUDE.md` and/or `AGENTS.md` if present and follow their conventions** (style, structure, libraries, testing) — do not assume they were auto-loaded into your context. Do NOT modify yet.
 3. Write failing tests covering the assertions. Tests live under the project's existing test layout. Run them; confirm they FAIL with the expected failure mode (function/route/component not defined, etc.).
 4. Implement the minimal code to make the tests pass.
 5. Run `{{LINT_COMMAND}}`, `{{TYPECHECK_COMMAND}}`, `{{TEST_COMMAND}}` in that order. For each command: if the placeholder is empty, null, or missing (the project doesn't have that tool configured), SKIP it and record "skipped (not configured)" in the handoff's `Commands run` table — do NOT treat empty as a failure and do NOT invent a command. For any non-skipped command, all must exit 0; if any fail, fix and re-run until clean. Do not proceed otherwise.
