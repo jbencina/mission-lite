@@ -42,16 +42,23 @@ You are the **orchestrator** of a long-running mission. You decompose a user goa
 Run when invoked with a goal and there is no existing mission directory passed by the user.
 
 1. **Pick a mission ID.** Format: `YYYY-MM-DD-<slug>` derived from today's date and a slug of the goal. If the directory already exists, append `-2`, `-3`, etc.
-2. **Create the mission directory.**
+
+2. **Require a clean working tree.** Run `git status --porcelain`, ignoring anything under `.missions/` (that is mission state, not project work). If any *project* file is modified, staged, or untracked, **stop** and ask the user to commit or stash before starting — the mission must not branch over uncommitted work. Then capture the base commit: `BASE_SHA=$(git rev-parse HEAD)`.
+
+3. **Create and check out the mission branch.** `git checkout -b "mission/<mission-id>"` from the current HEAD. Every worker commit lands on this branch; the skill never merges back to the base branch — that is the user's call at completion (Phase 6).
+
+4. **Guard mission state from feature commits.** Ensure `.missions/` is git-ignored: if `.gitignore` does not already cover it, append a `.missions/` line and commit just that one change on the mission branch. This stops workers from sweeping `state.json`/handoffs into their feature commits.
+
+5. **Create the mission directory.**
    ```bash
    MISSION_DIR=".missions/<mission-id>"
    mkdir -p "$MISSION_DIR"/{handoffs,validations,validations/reviewers,logs}
    cp <path-to-this-skill>/templates/mission-state.json "$MISSION_DIR/state.json"
    ```
-3. **Acquire the session lock** (see § Session locking). The mission directory is single-writer; abort if another live session holds the lock.
-4. **Populate `state.json` initial fields.** Use the atomic-update pattern from the cheat sheet. Set: `mission_id`, `goal`, `created_at`, `updated_at`, and any `models` overrides the user supplied in their invocation.
-5. **Do not detect or write project configuration yet.** Phase 1 owns collaborative discovery of stack, tooling, constraints, and validation surface. Leave `state.project` blank until the user has answered the elicitation checklist and explicitly confirmed the detected/projected commands.
-6. **Announce to the user:** mission directory created, moving to planning.
+6. **Acquire the session lock** (see § Session locking). The mission directory is single-writer; abort if another live session holds the lock.
+7. **Populate `state.json` initial fields.** Use the atomic-update pattern from the cheat sheet. Set: `mission_id`, `goal`, `created_at`, `updated_at`, `branch` (`mission/<mission-id>`), `base_sha` (the `BASE_SHA` from step 2), and any `models` overrides the user supplied in their invocation.
+8. **Do not detect or write project configuration yet.** Phase 1 owns collaborative discovery of stack, tooling, constraints, and validation surface. Leave `state.project` blank until the user has answered the elicitation checklist and explicitly confirmed the detected/projected commands.
+9. **Announce to the user:** mission branch `mission/<mission-id>` created from `<base_sha>`, mission directory created, moving to planning.
 
 ## Phase 1 — Planning
 
@@ -153,7 +160,7 @@ Loop invariant: this phase runs until the current milestone has no more `pending
 
      a. **Commit existence:** `git cat-file -e <sha>` — confirms the commit object exists. Fail = `commit SHA does not exist in repo`.
 
-     b. **Commit reachability:** `git branch --contains <sha>` — confirms the commit is on the current working branch (not orphaned on detached HEAD). Fail = `commit is not reachable from current branch`.
+     b. **Commit reachability:** `git branch --contains <sha>` must list `state.branch` (the mission branch) — confirms the commit is on the mission branch, not orphaned on a detached HEAD or stranded on another branch. Fail = `commit <sha> is not reachable from mission branch <state.branch>`.
 
      c. **File-list overlap:** `git show --name-only --format= <sha>` — confirms the commit's actual file list overlaps the handoff's declared `Files changed` section. A commit that touched none of the claimed files indicates fabrication. Fail = `commit file list does not match handoff Files changed`.
 
@@ -262,11 +269,13 @@ Triggered when the last milestone is `validated`.
 1. **Set `state.status = "complete"`.** Save.
 2. **Write `<mission-dir>/SUMMARY.md`** with:
    - mission ID, goal, started/finished timestamps
+   - the mission branch (`state.branch`) and its base commit (`state.base_sha`)
    - per-milestone summary: features delivered, follow-ups created, validation results
    - total worker invocations, total validator invocations
    - link to plan.md and validation-contract.md
+   - a closing note that all work is on `state.branch` for the user to review and merge — the mission did **not** merge to the base branch.
 3. **Release the session lock.** `rm -f <mission-dir>/.lock` (see § Session locking).
-4. **Announce completion** to the user with the path of `SUMMARY.md`.
+4. **Announce completion** to the user with the path of `SUMMARY.md`, and state that the work is on branch `state.branch` (branched from `state.base_sha`), ready for their review/merge. Do **not** merge or switch branches yourself.
 
 ## Resuming an existing mission
 
@@ -274,6 +283,7 @@ If the user invokes the skill with a path to an existing `.missions/<mission-id>
 
 1. **Acquire the session lock** (see § Session locking). If another live session holds the lock, abort with a human-readable error pointing the user at the other session.
 2. Read `state.json`. Note `status`, `cursor`, latest entry in `validation_log`, last handoff written.
+2a. **Check out the mission branch.** If `state.branch` is set and `git branch --show-current` differs, run `git checkout <state.branch>` before continuing. (Mission state under `.missions/` is git-ignored, so it persists across the switch.) If the working tree is dirty with project files, surface to the user rather than forcing the checkout.
 3. Branch on `status`:
    - **`planning`** → Re-enter Phase 1 (continue the planning conversation).
    - **`executing`** → Re-enter Phase 2 at the cursor's `current_feature`, phase determines exact entry point:
@@ -303,7 +313,7 @@ Every phase derives its next action from `state.json` + the latest written hando
 
 A mission directory is single-writer. Two Claude Code sessions running against the same `.missions/<id>/` will silently clobber each other's state. The orchestrator acquires a lock at session entry and releases it on clean exit.
 
-**Acquire the lock** (Phase 0 step 2.5, and Resume step 1a — see those phases):
+**Acquire the lock** (Phase 0 step 6, and Resume step 1 — see those phases):
 
 ```bash
 LOCK="<mission-dir>/.lock"

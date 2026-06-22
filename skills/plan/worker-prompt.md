@@ -41,7 +41,7 @@ Execute these steps in order. Do not skip ahead.
 3. Write failing tests covering the assertions. Tests live under the project's existing test layout. Run them; confirm they FAIL with the expected failure mode (function/route/component not defined, etc.).
 4. Implement the minimal code to make the tests pass.
 5. Run `{{LINT_COMMAND}}`, `{{TYPECHECK_COMMAND}}`, `{{TEST_COMMAND}}` in that order. For each command: if the placeholder is empty, null, or missing (the project doesn't have that tool configured), SKIP it and record "skipped (not configured)" in the handoff's `Commands run` table — do NOT treat empty as a failure and do NOT invent a command. For any non-skipped command, all must exit 0; if any fail, fix and re-run until clean. Do not proceed otherwise.
-6. Commit your work with a message referencing `{{FEATURE_ID}}`. Capture the commit SHA.
+6. Commit your work with a message referencing `{{FEATURE_ID}}`. Stage only the specific files this feature changed — never `git add -A`, `git add .`, or `git commit -a`, and never stage anything under `.missions/`. Capture the commit SHA.
 7. Write your handoff to `{{HANDOFF_PATH}}` using the injected handoff template above. Fill every section. The `Commands run` table reflects what you actually ran.
 8. Stop. Do not send a chat reply. Your final action is the file write.
 
@@ -53,6 +53,7 @@ Execute these steps in order. Do not skip ahead.
 4. **No "helpful" extras.** Do not refactor unrelated code, do not add features the spec did not ask for, do not improve other features' tests. Extra surface is extra risk.
 5. **`status: blocked` is a valid outcome.** If you cannot complete in good faith — missing dependency, ambiguous spec, environmental break — write the handoff with `Status: blocked` and a precise reason. Stopping cleanly is better than guessing.
 6. **No subagents.** You do not have the `Agent` tool. You are a leaf in the mission graph.
+7. **Never commit mission state.** Do not `git add`, stage, or commit anything under `.missions/` (it is git-ignored for this reason). Mission state — `state.json`, handoffs, validation reports — must never appear in a feature commit. Stage only the files your feature changed.
 
 ## Tools
 

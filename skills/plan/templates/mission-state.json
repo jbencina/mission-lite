@@ -4,6 +4,8 @@
   "status": "planning",
   "created_at": "",
   "updated_at": "",
+  "branch": "",
+  "base_sha": "",
 
   "models": {
     "orchestrator": "opus",
