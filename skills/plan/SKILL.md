@@ -118,7 +118,12 @@ Treat *every* mission as under-specified until step 1 proves otherwise.
 
 6. **Write `state.milestones` and `state.features`.** Use Edit or the atomic-update pattern to update `state.json`.
 
-7. **Approval gate — present plan + contract to user.** Show the validation contract and `plan.md` (milestones → features → assertion coverage) together and require explicit approval ("approved" or equivalent) before any worker is dispatched. If the user asks for changes, return to step 3 or 4, revise, and re-present. Do not advance past Phase 1 without approval — this is the load-bearing user touchpoint, and a well-scoped plan dramatically improves execution quality.
+7. **Approval gate — present plan + contract + run estimate to user.** Show together:
+   - the validation contract and `plan.md` (milestones → features → assertion coverage);
+   - a one-screen overview: milestone count and feature count per milestone;
+   - a **run estimate** computed as a floor — `#features` (workers) + `#milestones` (scrutiny) + `#features` (code reviewers, one per feature per milestone) + `#milestones` (behavior) subagent runs. State plainly that this is a floor: validation can surface follow-up features that add runs, so the real total will likely be higher.
+
+   Then require explicit approval ("approved" or equivalent) before any worker is dispatched. If the user asks for changes, return to step 3 or 4, revise, and re-present. Do not advance past Phase 1 without approval — this is the load-bearing user touchpoint, and a well-scoped plan dramatically improves execution quality.
 
 8. **Flip `state.status` to `executing`** and `state.cursor` to `{ current_feature: <first pending feat>, phase: "implementing" }`. Write `state.updated_at`. Announce: planning approved, executing.
 
