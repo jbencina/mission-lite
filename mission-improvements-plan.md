@@ -1,8 +1,9 @@
 # mission-lite improvements — implementation plan (WORKING DOC)
 
-> **Status:** Draft for review. Temporary planning artifact on the `mission-improvements`
-> branch — delete before merge. Synthesizes two review passes (the original six-change brief +
-> a state/correctness-focused review), reconciled. Open questions flagged **[NEEDS DECISION]**.
+> **Status:** ✅ IMPLEMENTED. Groups A–D are landed on `mission-improvements` as one commit each
+> (A1–A3, B1–B2, C1–C4, D1–D3); `claude plugin validate .` passes; coherence re-read done. The
+> "structured execution state" batch (GPT #2/#4) remains deferred. Temporary planning artifact —
+> delete before merge.
 
 All paths relative to `skills/plan/` unless noted. Each change = one logical commit. Apply in
 the group order below (A → D); within a group, order is flexible. After all changes:
