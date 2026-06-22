@@ -1,5 +1,5 @@
 ---
-name: mission-lite
+name: plan
 description: Use when the user requests a long-running multi-agent software engineering mission with planning, implementation, and adversarial validation. Spawns workers and validators per a validation contract, persists state to disk for resumability, self-corrects at milestone boundaries.
 ---
 

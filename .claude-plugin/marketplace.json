@@ -1,0 +1,15 @@
+{
+  "name": "jbencina",
+  "description": "John Bencina's Claude Code plugins.",
+  "owner": {
+    "name": "John Bencina",
+    "url": "https://github.com/jbencina"
+  },
+  "plugins": [
+    {
+      "name": "mission-lite",
+      "source": "./",
+      "description": "Long-running, self-correcting, multi-agent software engineering missions: plan, dispatch workers per feature, validate adversarially per milestone, and resume from disk."
+    }
+  ]
+}
