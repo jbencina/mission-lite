@@ -33,5 +33,9 @@
   },
 
   "validation_log": [],
-  "blocked_reason": null
+  "blocked_reason": null,
+
+  "policy": {
+    "max_worker_attempts_per_feature": 2
+  }
 }

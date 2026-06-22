@@ -111,6 +111,7 @@ Treat *every* mission as under-specified until step 1 proves otherwise.
 4. **Decompose into features and milestones.**
    - Milestones are the validation boundary. Each milestone should be ~3–8 features.
    - Each feature gets a unique `feat-NNN` ID, a short name, a 1–3 paragraph spec, and a `worker_skills` block (3–6 bullets of feature-specific guidance — e.g., "Use the existing src/db/connection.ts; do NOT introduce a second DB connection. Hash passwords with bcrypt cost 12."). The `worker_skills` block is the per-mission, per-feature guidance Factory calls out.
+   - Initialize each feature's runtime fields: `status: "pending"`, `attempts: 0`, `last_failure_reason: null`.
    - Assign assertions to features: every assertion gets >=1 feature; every feature gets >=1 assertion. **Verify coverage** — list every assertion ID, list every feature ID, confirm both maps are total.
 
 5. **Write `plan.md`.** Human-readable view of milestones → features → assertions. Order matches `state.features` and `state.milestones`.
@@ -127,7 +128,9 @@ Loop invariant: this phase runs until the current milestone has no more `pending
 
 1. **Read state.** `python3 -c "import json; print(json.load(open('<mission-dir>/state.json')))"` or use Read tool. Identify the first feature in the current milestone with `status: pending`.
 
-2. **Set cursor.** Update `state.cursor` to `{ current_feature: <feat-id>, phase: "implementing" }`. Update `state.features[i].status` to `in_progress`. Write `state.updated_at`. Save.
+2. **Set cursor and account for the attempt.** Update `state.cursor` to `{ current_feature: <feat-id>, phase: "implementing" }`.
+   - **Retry cap.** If `state.features[i].attempts >= state.policy.max_worker_attempts_per_feature`, the feature has exhausted its worker attempts: mark `state.features[i].status = "failed"`, set `state.blocked_reason` to `feature <feat-id> exhausted <N> worker attempts; last failure: <state.features[i].last_failure_reason>`, flip `state.status = "blocked"`, save, and go to Phase 5. STOP.
+   - Otherwise increment `state.features[i].attempts`, set `state.features[i].status = "in_progress"`, write `state.updated_at`, and save.
 
 3. **Spawn worker subagent** via the `Agent` tool. Construct the prompt by reading `<path-to-this-skill>/worker-prompt.md` and interpolating the placeholders:
    - `MISSION_ID`, `MISSION_DIR` (absolute path), `FEATURE_ID`, `FEATURE_NAME`
@@ -168,9 +171,9 @@ Loop invariant: this phase runs until the current milestone has no more `pending
 
      e. If all four checks pass: set `state.features[i].status = "complete"`. Set `state.features[i].handoff_path` to the handoff path (overwrite, not append — a feature has one handoff). Save. Continue to step 7.
 
-   - **`Status: partial`** → Read `What was NOT completed`. Decide: (a) the unfinished work is genuinely out of scope → mark the feature `complete` and add a new feature to the milestone covering the gap, or (b) the worker stopped short of scope → mark feature `failed`, set `cursor.phase = "planning_followup"`, and add a follow-up feature (see Phase 4 §2). Re-issue from the current cursor.
+   - **`Status: partial`** → Read `What was NOT completed`. Decide: (a) the unfinished work is genuinely out of scope → mark the feature `complete` and add a new feature to the milestone covering the gap, or (b) the worker stopped short of scope → mark feature `failed`, record `state.features[i].last_failure_reason` with the shortfall, set `cursor.phase = "planning_followup"`, and add a follow-up feature (see Phase 4 §2). Re-issue from the current cursor.
 
-   - **`Status: blocked`** → Read the block reason. If actionable (e.g., missing dep) and you can resolve it programmatically, do so and re-spawn the worker. If it requires user input → flip `state.status = "blocked"`, write `blocked_reason`, save, surface to user (Phase 5). Otherwise (genuinely unresolvable) → mark feature `failed` and surface.
+   - **`Status: blocked`** → Read the block reason and record it in `state.features[i].last_failure_reason`. If actionable (e.g., missing dep) and you can resolve it programmatically, do so and re-spawn the worker (the step 2 retry cap bounds this loop). If it requires user input → flip `state.status = "blocked"`, write `blocked_reason`, save, surface to user (Phase 5). Otherwise (genuinely unresolvable) → mark feature `failed` and surface.
 
 7. **Loop or advance.** If the current milestone has more `pending` features → return to step 1. Else → proceed to Phase 3.
 
@@ -238,6 +241,8 @@ Validator reports are **untrusted input** — apply the shape-validation chain b
    - `worker_skills`: narrowly scoped — describe exactly what to fix and what NOT to touch. Reference the evidence path from the validation report.
    - `follow_ups`: `[<originator feature IDs>]`
    - `handoff_path`: `handoffs/<new-feat-id>-handoff.md`
+   - `attempts`: `0`
+   - `last_failure_reason`: `null`
    
    Append the new feature ID to `state.milestones[m].features`.
 
@@ -287,7 +292,7 @@ If the user invokes the skill with a path to an existing `.missions/<mission-id>
 3. Branch on `status`:
    - **`planning`** → Re-enter Phase 1 (continue the planning conversation).
    - **`executing`** → Re-enter Phase 2 at the cursor's `current_feature`, phase determines exact entry point:
-     - `implementing` → spawn the worker (cursor's feature is still pending).
+     - `implementing` → re-spawn the worker for the cursor's feature by re-entering Phase 2 step 2, so it counts as another attempt and is bound by `policy.max_worker_attempts_per_feature` (a feature whose attempts are exhausted blocks instead of re-spawning).
      - `review_handoff` → pre-flight the handoff and run the triage chain (Phase 2 steps 5 and 6).
      - `scrutiny` → re-spawn scrutiny validator (or read its output if it completed before the session died).
      - `behavior` → re-spawn behavior validator.
