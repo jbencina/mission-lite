@@ -9,6 +9,7 @@
 
   "models": {
     "orchestrator": "opus",
+    "scout": "sonnet",
     "worker": "sonnet",
     "scrutiny_validator": "sonnet",
     "code_reviewer": "sonnet",

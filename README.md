@@ -45,6 +45,7 @@ The plugin manifest lives at `.claude-plugin/plugin.json`, the marketplace catal
 | `.claude-plugin/plugin.json` | Plugin manifest (name `mission-lite`, version, metadata). |
 | `.claude-plugin/marketplace.json` | Marketplace catalog so the repo is installable directly. |
 | `skills/plan/SKILL.md` | Orchestrator entry point (`/mission-lite:plan`). Phases 0–6: bootstrap, planning, execute, validation, self-correction, finalize. |
+| `skills/plan/scout-prompt.md` | System prompt for the read-only codebase scout that maps an existing repo during planning. |
 | `skills/plan/worker-prompt.md` | System prompt for worker subagents (one per feature). |
 | `skills/plan/scrutiny-validator-prompt.md` | System prompt for the scrutiny validator; fans out to per-feature reviewers. |
 | `skills/plan/code-review-subagent-prompt.md` | System prompt for per-feature reviewers spawned by the scrutiny validator. |
