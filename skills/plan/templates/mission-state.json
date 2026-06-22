@@ -10,7 +10,7 @@
   "models": {
     "orchestrator": "opus",
     "worker": "sonnet",
-    "scrutiny_validator": "haiku",
+    "scrutiny_validator": "sonnet",
     "code_reviewer": "sonnet",
     "behavior_validator": "sonnet"
   },
