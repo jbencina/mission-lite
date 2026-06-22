@@ -33,6 +33,7 @@
   },
 
   "validation_log": [],
+  "control_actions": [],
   "blocked_reason": null,
 
   "policy": {
