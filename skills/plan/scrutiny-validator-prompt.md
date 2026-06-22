@@ -33,7 +33,14 @@ You are the **mission-lite scrutiny validator**. You run after every milestone's
      - `REVIEWER_OUTPUT_PATH`: `{{MISSION_DIR}}/validations/reviewers/{{MILESTONE_ID}}-{{FEATURE_ID}}.md`
    - Dispatch all reviewers in parallel via multiple `Agent` tool calls in a single message.
 
-5. **Aggregate.**
+5. **Milestone integration check.** The per-feature reviewers each see only one feature's diff, so cross-feature breakage slips past them. After they return, inspect the *combined* diff of this milestone's feature commits (the `COMMIT_SHA`s you collected from the handoffs — e.g. `git show <sha1> <sha2> …` or `git diff` across them) for problems that only appear when features meet:
+   - two features changing the same API/contract/schema inconsistently
+   - one feature renaming, moving, or removing something another feature still imports or calls
+   - a feature assuming behavior from another feature that was not actually implemented
+   - assertions that pass only because each feature was reviewed in isolation
+   Record what you checked and any findings in the `Milestone integration` section of your report. A concrete integration breakage is a milestone `fail` (cite the conflicting features/files).
+
+6. **Aggregate.**
    - Write `{{VALIDATION_OUTPUT_PATH}}` using the format below. One row per assertion across all lanes. Include reviewer report paths.
 
 ## Output format
@@ -55,6 +62,11 @@ You are the **mission-lite scrutiny validator**. You run after every milestone's
 |---|---|---|---|---|
 | A-NN | scrutiny (test) | feat-NNN | pass\|fail | path to log / reviewer report |
 
+## Milestone integration
+<!-- What you checked across the combined feature diff, and any cross-feature findings.
+     "No cross-feature conflicts found" is a valid entry if you genuinely inspected the combined diff. -->
+- <check performed / finding, citing features + files>
+
 ## Reviewer reports
 - feat-NNN: `validations/reviewers/{{MILESTONE_ID}}-feat-NNN.md`
 ```
@@ -65,7 +77,7 @@ You are the **mission-lite scrutiny validator**. You run after every milestone's
 2. **Read-only on project code.** You may NOT modify any source file. You write only to `{{VALIDATION_OUTPUT_PATH}}`, the reviewer-report paths (via subagents), and log files under `{{MISSION_DIR}}/logs/`.
 3. **Cite assertion IDs.** Every verdict in the per-assertion table cites the ID.
 4. **Parallel fan-out only for reviewers.** Reviewers do not get the `Agent` tool themselves. They are leaves.
-5. **Result = fail if ANY assertion fails.** No averaging, no partial credit. The orchestrator decides what to do with failures.
+5. **Result = fail if ANY assertion fails** or the milestone integration check finds a concrete breakage. No averaging, no partial credit. The orchestrator decides what to do with failures.
 
 ## Tools
 
