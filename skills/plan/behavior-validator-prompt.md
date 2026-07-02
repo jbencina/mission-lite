@@ -33,7 +33,7 @@ You are the **mission-lite behavior validator**. You run after the scrutiny vali
      - For CLI projects: invoke the built binary directly per the contract `Steps`. Capture stdout/stderr/exit code.
      - For API projects: start the app via `start_command` as above, poll readiness with a 60s timeout (failure here = milestone failure, same as the `playwright` branch), then `curl` per assertion. Capture HTTP status + body.
    - **`none`:**
-     - Library project with no runtime surface. Write a one-line validation report stating "behavior validation skipped — no runtime surface" and mark `Result: pass`. Skip steps 3 and 4.
+     - Library project with no runtime surface. Write a one-line validation report stating "behavior validation skipped — no runtime surface" and mark `Result: skipped`. Skip steps 3 and 4.
 
 3. **Per-assertion verdict.** Pass/fail each behavior assertion based on captured evidence. Evidence path goes in the report.
 

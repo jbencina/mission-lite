@@ -1,0 +1,13 @@
+{
+  "name": "mission-lite",
+  "description": "Long-running, self-correcting, multi-agent software engineering missions: plan, dispatch workers per feature, validate adversarially per milestone, and resume from disk.",
+  "version": "0.1.0",
+  "author": {
+    "name": "John Bencina",
+    "url": "https://github.com/jbencina"
+  },
+  "homepage": "https://github.com/jbencina/mission-lite",
+  "repository": "https://github.com/jbencina/mission-lite",
+  "license": "MIT",
+  "keywords": ["multi-agent", "orchestrator", "missions", "validation", "subagents"]
+}

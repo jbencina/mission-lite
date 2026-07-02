@@ -5,8 +5,9 @@
 | Role | Default | Why |
 |---|---|---|
 | Orchestrator | `opus` | Planning and decomposition. Slow careful reasoning, high stakes if features are picked wrong. |
+| Scout | `sonnet` | Read-only codebase mapping for existing repos (Phase 1). Needs strong code comprehension to find reuse and landmines; runs once. |
 | Worker | `sonnet` | Fast code fluency. The rigid worker prompt enforces discipline. |
-| Scrutiny validator | `haiku` | Mostly running commands and checking outputs. Precise instruction-following over creativity. |
+| Scrutiny validator | `sonnet` | Coordinates the reviewer fan-out, aggregates their reports, judges test coverage, and runs the milestone integration check, then sets the milestone pass/fail. The command *execution* is mechanical, but that *aggregation and integration judgment* is not — which is why it warrants a stronger model than command-running alone would suggest. |
 | Code reviewer (fan-out) | `sonnet` | Needs to reason about a diff and find real bugs. |
 | Behavior validator | `sonnet` | Needs to drive Playwright or interpret runtime output. |
 
