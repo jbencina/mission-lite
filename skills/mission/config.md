@@ -30,12 +30,21 @@ The orchestrator parses this during Phase 0 and writes it into `state.models` be
 
 **2. Edit `state.json` before approving the plan.** After Phase 1 produces the plan, the orchestrator pauses for user approval. The user can edit `state.models` directly at that point. The orchestrator re-reads state before Phase 2 begins.
 
+## Models across platforms
+
+The table above uses Claude tier names (`opus`, `sonnet`). The **role → tier intent** is what's portable — a strong model for the orchestrator and validators (careful reasoning, high stakes if features or verdicts are wrong), a faster model for workers (code fluency under a rigid prompt). The exact values are platform-specific:
+
+- **Claude Code** honors `state.models.<role>` per dispatch (see `references/claude-tools.md`).
+- **Copilot CLI**: per-subagent model selection is weak/undocumented, so these values are **advisory** — all subagents may run on the session model. Set it with `/model` or `--model`, and read `opus`/`sonnet` here as "strong tier" / "fast tier", mapping to whatever strong/fast models the session offers. See fidelity gap **G2** in `references/copilot-tools.md`.
+
+The template ships Claude defaults; override per the two paths above for other platforms.
+
 ## Model-agnostic contract
 
-The skill spawns subagents via Claude Code's `Agent` tool, but the same role contract could be fulfilled by any external CLI:
+The skill dispatches subagents via your platform's dispatch tool (Claude Code `Agent`, Copilot CLI `task` — see `references/`), and the same role contract is fulfilled identically on each:
 
 - Subagent receives: a prompt file, a path to the mission directory, optional per-role context (feature spec, assertions, etc.).
 - Subagent must: read its prompt, do its work, write its output file at the orchestrator-specified path (`handoffs/<feature-id>-handoff.md` for workers, `validations/<milestone>-<type>.md` for validators), and exit.
-- Subagent must not: hold state across invocations, modify files outside its scope, or spawn deeper subagents unless its prompt grants the `Agent` tool.
+- Subagent must not: hold state across invocations, modify files outside its scope, or spawn deeper subagents unless its prompt grants a subagent-dispatch tool.
 
-A future override could swap one or more roles to an external CLI by editing this contract surface alone — `SKILL.md` remains unchanged.
+Swapping a role to another CLI touches only this contract surface and the per-platform tool maps in `references/` — the skill body and prompts, written in action language, remain unchanged.
