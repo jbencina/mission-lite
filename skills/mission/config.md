@@ -36,12 +36,13 @@ The table above uses Claude tier names (`opus`, `sonnet`). The **role → tier i
 
 - **Claude Code** honors `state.models.<role>` per dispatch (see `references/claude-tools.md`).
 - **Copilot CLI**: per-subagent model selection is weak/undocumented, so these values are **advisory** — all subagents may run on the session model. Set it with `/model` or `--model`, and read `opus`/`sonnet` here as "strong tier" / "fast tier", mapping to whatever strong/fast models the session offers. See fidelity gap **G2** in `references/copilot-tools.md`.
+- **Codex**: per-subagent model selection depends on the Codex surface. Treat these values as role-tier intent unless the available subagent-dispatch tool supports explicit model selection. See caveat **C2** in `references/codex-tools.md`.
 
 The template ships Claude defaults; override per the two paths above for other platforms.
 
 ## Model-agnostic contract
 
-The skill dispatches subagents via your platform's dispatch tool (Claude Code `Agent`, Copilot CLI `task` — see `references/`), and the same role contract is fulfilled identically on each:
+The skill dispatches subagents via your platform's dispatch tool (Codex subagent tool, Claude Code `Agent`, Copilot CLI `task` — see `references/`), and the same role contract is fulfilled identically on each:
 
 - Subagent receives: a prompt file, a path to the mission directory, optional per-role context (feature spec, assertions, etc.).
 - Subagent must: read its prompt, do its work, write its output file at the orchestrator-specified path (`handoffs/<feature-id>-handoff.md` for workers, `validations/<milestone>-<type>.md` for validators), and exit.

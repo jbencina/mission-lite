@@ -1,10 +1,10 @@
 # mission-lite
 
-A plugin for long-running, self-correcting, multi-agent software engineering missions — runs on **Claude Code** and **GitHub Copilot CLI** from one shared skill. Vibe-coded by the orchestrator-worker-validator pattern described in [The Five Types of Multi-Agent Architecture](https://www.youtube.com/watch?v=ow1we5PzK-o) and by Factory's [Missions workflow](https://docs.factory.ai/cli/features/missions).
+A plugin for long-running, self-correcting, multi-agent software engineering missions — runs on **Codex**, **Claude Code**, and **GitHub Copilot CLI** from one shared skill. Vibe-coded by the orchestrator-worker-validator pattern described in [The Five Types of Multi-Agent Architecture](https://www.youtube.com/watch?v=ow1we5PzK-o) and by Factory's [Missions workflow](https://docs.factory.ai/cli/features/missions).
 
 ## What it does
 
-You invoke the skill with a goal (e.g. "add OAuth login to the checkout flow"). Claude Code then:
+You invoke the skill with a goal (e.g. "add OAuth login to the checkout flow"). The coding agent then:
 
 1. **Plans** — decomposes the goal into features grouped by milestones, writes a validation contract, and persists everything to `<project>/.missions/<mission-id>/`.
 2. **Executes** — spawns a fresh worker subagent per feature with a focused prompt and a handoff template.
@@ -18,11 +18,21 @@ Factory Missions can leverage existing skills and develop specialized skills dur
 
 ## Installing
 
-This repo is one plugin (and a single-plugin marketplace) that installs on both CLIs from the same `.claude-plugin/` manifest and shared `skills/mission/` directory. The skill body is written in action language; per-platform tool names live in `skills/mission/references/`.
+This repo is one plugin with platform-specific manifests that point at the shared `skills/mission/` directory. The skill body is written in action language; per-platform tool names live in `skills/mission/references/`.
+
+### Codex
+
+Codex reads `.codex-plugin/plugin.json`, which points at the shared `skills/` directory:
+
+```text
+codex plugin add mission-lite@<your-marketplace>
+```
+
+Then invoke by asking Codex to *use the mission skill* with a goal, for example: "use the mission skill to build …". Codex behavior and caveats are documented in `skills/mission/references/codex-tools.md`.
 
 ### Claude Code
 
-This repo is a [Claude Code plugin](https://code.claude.com/docs/en/plugins). Add the marketplace and install:
+This repo is also a [Claude Code plugin](https://code.claude.com/docs/en/plugins). Add the marketplace and install:
 
 ```text
 /plugin marketplace add jbencina/mission-lite
@@ -51,15 +61,16 @@ git clone https://github.com/jbencina/mission-lite.git
 claude --plugin-dir ./mission-lite
 ```
 
-Run `claude plugin validate .` after editing the manifests.
+Run `claude plugin validate .` after editing the Claude manifests, and `python3 /home/jbencina/.codex/skills/.system/plugin-creator/scripts/validate_plugin.py .` after editing the Codex manifest.
 
 ## Contents
 
-The plugin manifest lives at `.claude-plugin/plugin.json`, the marketplace catalog at `.claude-plugin/marketplace.json`, and the skill at `skills/mission/`:
+The Claude plugin manifest lives at `.claude-plugin/plugin.json`, the Codex plugin manifest lives at `.codex-plugin/plugin.json`, the Claude marketplace catalog at `.claude-plugin/marketplace.json`, and the skill at `skills/mission/`:
 
 | File | Role |
 | :--- | :--- |
 | `.claude-plugin/plugin.json` | Plugin manifest (name `mission-lite`, version, metadata). |
+| `.codex-plugin/plugin.json` | Codex plugin manifest, pointing at the shared `skills/` directory. |
 | `.claude-plugin/marketplace.json` | Marketplace catalog so the repo is installable directly. |
 | `skills/mission/SKILL.md` | Orchestrator entry point (`/mission-lite:mission`). Phases 0–6: bootstrap, planning, execute, validation, self-correction, finalize. |
 | `skills/mission/scout-prompt.md` | System prompt for the read-only codebase scout that maps an existing repo during planning. |
@@ -68,7 +79,7 @@ The plugin manifest lives at `.claude-plugin/plugin.json`, the marketplace catal
 | `skills/mission/code-review-subagent-prompt.md` | System prompt for per-feature reviewers spawned by the scrutiny validator. |
 | `skills/mission/behavior-validator-prompt.md` | System prompt for the behavior validator (runs the app and checks observable behavior). |
 | `skills/mission/config.md` | Default model assignments for orchestrator, workers, and validators, plus how models map across platforms. |
-| `skills/mission/references/{claude,copilot}-tools.md` | Per-platform tool maps: how the skill's action-language verbs resolve to each CLI's tools, plus Copilot fidelity caveats. |
+| `skills/mission/references/{codex,claude,copilot}-tools.md` | Per-platform tool maps: how the skill's action-language verbs resolve to each CLI's tools, plus fidelity caveats. |
 | `skills/mission/templates/mission-state.json` | Starter state file copied into each new mission directory. |
 | `skills/mission/templates/handoff.md` | Worker → orchestrator handoff template. |
 | `skills/mission/templates/validation-contract.md` | Template the orchestrator fills in during planning. |

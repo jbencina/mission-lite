@@ -17,21 +17,21 @@ You are the **orchestrator** of a long-running mission. You decompose a user goa
 - `templates/handoff.md` — worker handoff template (read by you and injected into worker prompts)
 - `templates/validation-contract.md` — validation contract template
 - `config.md` — model defaults
-- `references/claude-tools.md`, `references/copilot-tools.md` — how this skill's actions map to each CLI's tools
+- `references/codex-tools.md`, `references/claude-tools.md`, `references/copilot-tools.md` — how this skill's actions map to each CLI's tools
 
 ## Tool vocabulary (cross-platform)
 
 This skill is written in **action language** so the same body runs on any coding-agent CLI. Resolve each action to your runtime's tool:
 
-| Action | Claude Code | Copilot CLI |
-|---|---|---|
-| Read / search / find files | `Read` · `Grep` · `Glob` | `view` · `rg` · `glob` |
-| Create / edit a file | `Write` · `Edit` | `create` · `apply_patch` |
-| Run a shell command | `Bash` | `bash` |
-| Dispatch a subagent | `Agent` (with `subagent_type`) | `task` (`agent_type: "general-purpose"`) |
-| Parallel dispatch | multiple `Agent` calls in one turn | multiple `task` calls in one turn |
+| Action | Codex | Claude Code | Copilot CLI |
+|---|---|---|---|
+| Read / search / find files | `exec_command` with `sed`/`rg`/`find` | `Read` · `Grep` · `Glob` | `view` · `rg` · `glob` |
+| Create / edit a file | `apply_patch` | `Write` · `Edit` | `create` · `apply_patch` |
+| Run a shell command | `exec_command` | `Bash` | `bash` |
+| Dispatch a subagent | available multi-agent subagent tool | `Agent` (with `subagent_type`) | `task` (`agent_type: "general-purpose"`) |
+| Parallel dispatch | multiple subagent calls in one turn | multiple `Agent` calls in one turn | multiple `task` calls in one turn |
 
-Each subagent prompt (`worker-prompt.md`, etc.) carries its own inline map so it stays self-contained when read in isolation. Full detail and the Copilot permission-model caveats live in `references/copilot-tools.md`.
+Each subagent prompt (`worker-prompt.md`, etc.) carries its own inline map so it stays self-contained when read in isolation. Full detail and platform caveats live in `references/`.
 
 ## Scope
 
