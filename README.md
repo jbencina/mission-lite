@@ -1,6 +1,6 @@
 # mission-lite
 
-A Claude Code plugin for long-running, self-correcting, multi-agent software engineering missions. Vibe-coded by the orchestrator-worker-validator pattern described in [The Five Types of Multi-Agent Architecture](https://www.youtube.com/watch?v=ow1we5PzK-o) and by Factory's [Missions workflow](https://docs.factory.ai/cli/features/missions).
+A plugin for long-running, self-correcting, multi-agent software engineering missions — runs on **Claude Code** and **GitHub Copilot CLI** from one shared skill. Vibe-coded by the orchestrator-worker-validator pattern described in [The Five Types of Multi-Agent Architecture](https://www.youtube.com/watch?v=ow1we5PzK-o) and by Factory's [Missions workflow](https://docs.factory.ai/cli/features/missions).
 
 ## What it does
 
@@ -10,7 +10,7 @@ You invoke the skill with a goal (e.g. "add OAuth login to the checkout flow"). 
 2. **Executes** — spawns a fresh worker subagent per feature with a focused prompt and a handoff template.
 3. **Validates** — at each milestone boundary, spawns adversarial validator subagents (scrutiny + behavior) with fresh context to look for regressions, missing tests, and broken behavior.
 4. **Self-corrects** — when validators surface issues, the orchestrator appends follow-up features and re-validates rather than declaring success.
-5. **Resumes** — all state lives on disk, so any future Claude Code session can pick the mission back up.
+5. **Resumes** — all state lives on disk, so any future session can pick the mission back up.
 
 The orchestrator itself does not write production code. Workers do that. The orchestrator's edits are confined to mission state, plan, validation contract, and final summary.
 
@@ -18,7 +18,11 @@ Factory Missions can leverage existing skills and develop specialized skills dur
 
 ## Installing
 
-This repo is a [Claude Code plugin](https://code.claude.com/docs/en/plugins) (and a single-plugin marketplace). Add the marketplace and install:
+This repo is one plugin (and a single-plugin marketplace) that installs on both CLIs from the same `.claude-plugin/` manifest and shared `skills/plan/` directory. The skill body is written in action language; per-platform tool names live in `skills/plan/references/`.
+
+### Claude Code
+
+This repo is a [Claude Code plugin](https://code.claude.com/docs/en/plugins). Add the marketplace and install:
 
 ```text
 /plugin marketplace add jbencina/mission-lite
@@ -26,6 +30,19 @@ This repo is a [Claude Code plugin](https://code.claude.com/docs/en/plugins) (an
 ```
 
 Then invoke from any project with `/mission-lite:plan` or by asking Claude to start a mission.
+
+### GitHub Copilot CLI
+
+Copilot CLI resolves the same `.claude-plugin/` manifest via its fallback chain and reads the shared `skills/plan/` directory:
+
+```text
+copilot plugin marketplace add jbencina/mission-lite
+copilot plugin install mission-lite@jbencina
+```
+
+Copilot has no custom slash commands, so there is no `/mission-lite:plan` — trigger the skill by name (`/plan`) or by describing the goal so it autoloads. A few behaviors differ on Copilot (per-subagent tool scoping and model selection are coarser; Playwright runs via MCP); these are documented in `skills/plan/references/copilot-tools.md`.
+
+### Local development
 
 To hack on it locally without installing, point Claude Code at the checkout:
 
@@ -50,7 +67,8 @@ The plugin manifest lives at `.claude-plugin/plugin.json`, the marketplace catal
 | `skills/plan/scrutiny-validator-prompt.md` | System prompt for the scrutiny validator; fans out to per-feature reviewers. |
 | `skills/plan/code-review-subagent-prompt.md` | System prompt for per-feature reviewers spawned by the scrutiny validator. |
 | `skills/plan/behavior-validator-prompt.md` | System prompt for the behavior validator (runs the app and checks observable behavior). |
-| `skills/plan/config.md` | Default model assignments for orchestrator, workers, and validators. |
+| `skills/plan/config.md` | Default model assignments for orchestrator, workers, and validators, plus how models map across platforms. |
+| `skills/plan/references/{claude,copilot}-tools.md` | Per-platform tool maps: how the skill's action-language verbs resolve to each CLI's tools, plus Copilot fidelity caveats. |
 | `skills/plan/templates/mission-state.json` | Starter state file copied into each new mission directory. |
 | `skills/plan/templates/handoff.md` | Worker → orchestrator handoff template. |
 | `skills/plan/templates/validation-contract.md` | Template the orchestrator fills in during planning. |

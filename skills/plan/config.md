@@ -45,6 +45,6 @@ The skill dispatches subagents via your platform's dispatch tool (Claude Code `A
 
 - Subagent receives: a prompt file, a path to the mission directory, optional per-role context (feature spec, assertions, etc.).
 - Subagent must: read its prompt, do its work, write its output file at the orchestrator-specified path (`handoffs/<feature-id>-handoff.md` for workers, `validations/<milestone>-<type>.md` for validators), and exit.
-- Subagent must not: hold state across invocations, modify files outside its scope, or spawn deeper subagents unless its prompt grants the `Agent` tool.
+- Subagent must not: hold state across invocations, modify files outside its scope, or spawn deeper subagents unless its prompt grants a subagent-dispatch tool.
 
 Swapping a role to another CLI touches only this contract surface and the per-platform tool maps in `references/` — the skill body and prompts, written in action language, remain unchanged.
