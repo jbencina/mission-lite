@@ -1,0 +1,27 @@
+{
+  "name": "mission-lite",
+  "description": "Long-running, self-correcting, multi-agent software engineering missions: plan, dispatch workers per feature, validate adversarially per milestone, and resume from disk.",
+  "version": "0.1.0",
+  "author": {
+    "name": "John Bencina",
+    "url": "https://github.com/jbencina"
+  },
+  "homepage": "https://github.com/jbencina/mission-lite",
+  "repository": "https://github.com/jbencina/mission-lite",
+  "license": "MIT",
+  "keywords": ["multi-agent", "orchestrator", "missions", "validation", "subagents"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Mission Lite",
+    "shortDescription": "Run long-lived, self-correcting coding missions.",
+    "longDescription": "Mission Lite turns a broad software goal into a persisted mission: contract-first planning, feature workers, adversarial milestone validation, follow-up fixes, and resumable on-disk state.",
+    "developerName": "John Bencina",
+    "category": "Productivity",
+    "capabilities": ["Interactive", "Write"],
+    "defaultPrompt": [
+      "Use the mission skill to build a multi-feature app.",
+      "Start a mission for this refactor.",
+      "Resume my existing mission."
+    ]
+  }
+}
