@@ -40,7 +40,7 @@ copilot plugin marketplace add jbencina/mission-lite
 copilot plugin install mission-lite@jbencina
 ```
 
-Copilot has no custom slash commands, so there is no `/mission-lite:plan` — trigger the skill by name (`/plan`) or by describing the goal so it autoloads. A few behaviors differ on Copilot (per-subagent tool scoping and model selection are coarser; Playwright runs via MCP); these are documented in `skills/plan/references/copilot-tools.md`.
+Copilot has no custom slash commands, so there is no `/mission-lite:plan`. **Do not type `/plan`** — that is a built-in Copilot command (native plan mode), not this skill. Instead, launch a mission by describing the goal so Copilot autoloads the skill on its `description` (e.g. "start a mission to build …"), or by explicitly asking Copilot to *use the mission-lite plan skill*. A few behaviors differ on Copilot (per-subagent tool scoping and model selection are coarser; Playwright runs via MCP); these are documented in `skills/plan/references/copilot-tools.md`.
 
 ### Local development
 
