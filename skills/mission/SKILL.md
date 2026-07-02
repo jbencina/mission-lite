@@ -1,5 +1,5 @@
 ---
-name: plan
+name: mission
 description: Use when the user wants to build a whole multi-feature system from a single goal — a complete app or full-stack feature set ("build me a task tracker with auth, tests, and a UI"), a large brownfield migration or refactor, or an ambitious prototype — i.e. long-running work spanning many features and milestones, not a single edit or quick fix. Decomposes the goal into a validation contract and feature/milestone plan, spawns worker and adversarial validator subagents, persists state to disk for resumability, and self-corrects at milestone boundaries.
 ---
 

@@ -18,7 +18,7 @@ Factory Missions can leverage existing skills and develop specialized skills dur
 
 ## Installing
 
-This repo is one plugin (and a single-plugin marketplace) that installs on both CLIs from the same `.claude-plugin/` manifest and shared `skills/plan/` directory. The skill body is written in action language; per-platform tool names live in `skills/plan/references/`.
+This repo is one plugin (and a single-plugin marketplace) that installs on both CLIs from the same `.claude-plugin/` manifest and shared `skills/mission/` directory. The skill body is written in action language; per-platform tool names live in `skills/mission/references/`.
 
 ### Claude Code
 
@@ -29,18 +29,18 @@ This repo is a [Claude Code plugin](https://code.claude.com/docs/en/plugins). Ad
 /plugin install mission-lite@jbencina
 ```
 
-Then invoke from any project with `/mission-lite:plan` or by asking Claude to start a mission.
+Then invoke from any project with `/mission-lite:mission` or by asking Claude to start a mission.
 
 ### GitHub Copilot CLI
 
-Copilot CLI resolves the same `.claude-plugin/` manifest via its fallback chain and reads the shared `skills/plan/` directory:
+Copilot CLI resolves the same `.claude-plugin/` manifest via its fallback chain and reads the shared `skills/mission/` directory:
 
 ```text
 copilot plugin marketplace add jbencina/mission-lite
 copilot plugin install mission-lite@jbencina
 ```
 
-Copilot has no custom slash commands, so there is no `/mission-lite:plan`. **Do not type `/plan`** — that is a built-in Copilot command (native plan mode), not this skill. Instead, launch a mission by describing the goal so Copilot autoloads the skill on its `description` (e.g. "start a mission to build …"), or by explicitly asking Copilot to *use the mission-lite plan skill*. A few behaviors differ on Copilot (per-subagent tool scoping and model selection are coarser; Playwright runs via MCP); these are documented in `skills/plan/references/copilot-tools.md`.
+Copilot has no custom slash commands, so there is no `/mission-lite:mission` — launch by describing the goal so Copilot autoloads the skill on its `description` (e.g. "start a mission to build …"), or by explicitly asking Copilot to *use the mission skill*. (The skill is named `mission`, not `plan`, specifically to avoid colliding with Copilot's built-in `/plan` command.) A few behaviors differ on Copilot (per-subagent tool scoping and model selection are coarser; Playwright runs via MCP); these are documented in `skills/mission/references/copilot-tools.md`.
 
 ### Local development
 
@@ -55,20 +55,20 @@ Run `claude plugin validate .` after editing the manifests.
 
 ## Contents
 
-The plugin manifest lives at `.claude-plugin/plugin.json`, the marketplace catalog at `.claude-plugin/marketplace.json`, and the skill at `skills/plan/`:
+The plugin manifest lives at `.claude-plugin/plugin.json`, the marketplace catalog at `.claude-plugin/marketplace.json`, and the skill at `skills/mission/`:
 
 | File | Role |
 | :--- | :--- |
 | `.claude-plugin/plugin.json` | Plugin manifest (name `mission-lite`, version, metadata). |
 | `.claude-plugin/marketplace.json` | Marketplace catalog so the repo is installable directly. |
-| `skills/plan/SKILL.md` | Orchestrator entry point (`/mission-lite:plan`). Phases 0–6: bootstrap, planning, execute, validation, self-correction, finalize. |
-| `skills/plan/scout-prompt.md` | System prompt for the read-only codebase scout that maps an existing repo during planning. |
-| `skills/plan/worker-prompt.md` | System prompt for worker subagents (one per feature). |
-| `skills/plan/scrutiny-validator-prompt.md` | System prompt for the scrutiny validator; fans out to per-feature reviewers. |
-| `skills/plan/code-review-subagent-prompt.md` | System prompt for per-feature reviewers spawned by the scrutiny validator. |
-| `skills/plan/behavior-validator-prompt.md` | System prompt for the behavior validator (runs the app and checks observable behavior). |
-| `skills/plan/config.md` | Default model assignments for orchestrator, workers, and validators, plus how models map across platforms. |
-| `skills/plan/references/{claude,copilot}-tools.md` | Per-platform tool maps: how the skill's action-language verbs resolve to each CLI's tools, plus Copilot fidelity caveats. |
-| `skills/plan/templates/mission-state.json` | Starter state file copied into each new mission directory. |
-| `skills/plan/templates/handoff.md` | Worker → orchestrator handoff template. |
-| `skills/plan/templates/validation-contract.md` | Template the orchestrator fills in during planning. |
+| `skills/mission/SKILL.md` | Orchestrator entry point (`/mission-lite:mission`). Phases 0–6: bootstrap, planning, execute, validation, self-correction, finalize. |
+| `skills/mission/scout-prompt.md` | System prompt for the read-only codebase scout that maps an existing repo during planning. |
+| `skills/mission/worker-prompt.md` | System prompt for worker subagents (one per feature). |
+| `skills/mission/scrutiny-validator-prompt.md` | System prompt for the scrutiny validator; fans out to per-feature reviewers. |
+| `skills/mission/code-review-subagent-prompt.md` | System prompt for per-feature reviewers spawned by the scrutiny validator. |
+| `skills/mission/behavior-validator-prompt.md` | System prompt for the behavior validator (runs the app and checks observable behavior). |
+| `skills/mission/config.md` | Default model assignments for orchestrator, workers, and validators, plus how models map across platforms. |
+| `skills/mission/references/{claude,copilot}-tools.md` | Per-platform tool maps: how the skill's action-language verbs resolve to each CLI's tools, plus Copilot fidelity caveats. |
+| `skills/mission/templates/mission-state.json` | Starter state file copied into each new mission directory. |
+| `skills/mission/templates/handoff.md` | Worker → orchestrator handoff template. |
+| `skills/mission/templates/validation-contract.md` | Template the orchestrator fills in during planning. |
